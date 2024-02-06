@@ -25,13 +25,22 @@ public class PsqlStore implements Store {
         );
     }
 
+    private Post makeNewPost(ResultSet resultSet) throws SQLException {
+        int id = resultSet.getInt("id");
+        String name = resultSet.getString("name");
+        String text = resultSet.getString("text");
+        String link = resultSet.getString("link");
+        Timestamp created = resultSet.getTimestamp("created");
+        return new Post(id, name, text, link, created.toLocalDateTime());
+    }
+
     @Override
     public void save(Post post) {
         Timestamp timestampFromLDT = Timestamp.valueOf(post.getCreated());
         String sql = """
                 INSERT INTO post (name, text, link, created) VALUES (?, ?, ?, ?)
                 ON CONFLICT (link)
-                DO UPDATE SET name = EXCLUDED.name, text = EXCLUDED.text, created = EXCLUDED.created""";
+                DO NOTHING""";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, post.getTitle());
             statement.setString(2, post.getDescription());
@@ -52,38 +61,24 @@ public class PsqlStore implements Store {
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String name = resultSet.getString("name");
-                String text = resultSet.getString("text");
-                String link = resultSet.getString("link");
-                Timestamp created = resultSet.getTimestamp("created");
-
-                Post post = new Post(id, name, text, link, created.toLocalDateTime());
-                post.setId(id);
+                Post post = makeNewPost(resultSet);
                 posts.add(post);
             }
         } catch (SQLException e) {
             throw new IllegalStateException("Error retrieving items from the database", e);
         }
-
         return posts;
     }
 
     @Override
     public Post findById(int id) {
-        Post postById = null;
         String sql = "SELECT * FROM post WHERE id = ?";
+        Post postById = null;
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    String name = resultSet.getString("name");
-                    String text = resultSet.getString("text");
-                    String link = resultSet.getString("link");
-                    Timestamp created = resultSet.getTimestamp("created");
-
-                    postById = new Post(id, name, text, link, created.toLocalDateTime());
-                    postById.setId(id);
+                    postById = makeNewPost(resultSet);
                 }
             }
         } catch (SQLException e) {
@@ -92,6 +87,7 @@ public class PsqlStore implements Store {
 
         return postById;
     }
+
     @Override
     public void close() throws Exception {
         if (connection != null) {
