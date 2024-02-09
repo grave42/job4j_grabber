@@ -94,28 +94,4 @@ public class PsqlStore implements Store {
             connection.close();
         }
     }
-
-    public static void main(String[] args) throws SQLException {
-        try {
-            Properties config = new Properties();
-            try (FileInputStream input = new FileInputStream("src/main/resources/rabbit.properties")) {
-                config.load(input);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            PsqlStore psqlStore = new PsqlStore(config);
-            LocalDateTime currentDateTime = LocalDateTime.now();
-            Post example = new Post(1, "Java", "http://example.com", "ЭТО ПРИМЕР", currentDateTime);
-            psqlStore.save(example);
-            Post example2 = new Post(1, "Python", "http://lol.com", "ЭТО ПРИМЕР 2", currentDateTime);
-            psqlStore.save(example2);
-            List<Post> exampleListPost = psqlStore.getAll();
-            Post postById = psqlStore.findById(1);
-            psqlStore.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

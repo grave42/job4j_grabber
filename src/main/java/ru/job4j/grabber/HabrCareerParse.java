@@ -56,10 +56,5 @@ public class HabrCareerParse implements Parse {
         }
         return resultList;
     }
-
-    public static void main(String[] args) throws IOException {
-        HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
-        List<Post> vacancyList = habrCareerParse.list(SOURCE_LINK);
-    }
 }
 
