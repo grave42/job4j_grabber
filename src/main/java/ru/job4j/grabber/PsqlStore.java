@@ -31,7 +31,7 @@ public class PsqlStore implements Store {
         String text = resultSet.getString("text");
         String link = resultSet.getString("link");
         Timestamp created = resultSet.getTimestamp("created");
-        return new Post(id, name, text, link, created.toLocalDateTime());
+        return new Post(id, name, link, text, created.toLocalDateTime());
     }
 
     @Override

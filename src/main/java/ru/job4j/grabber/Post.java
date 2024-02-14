@@ -41,7 +41,8 @@ public class Post {
                 + "id=" + id
                 + ", title='" + title + '\''
                 + ", link='" + link + '\''
-                + ", created=" + created
+                + ", created=" + created + '\''
+                + ", description=" + description
                 + '}';
     }
 
